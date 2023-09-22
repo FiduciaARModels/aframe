@@ -2,22 +2,34 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>AR Scene</title>
+    <title>AR Hit Test</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <!-- Include the AR.js library -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   </head>
   <body>
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <!-- Your AR content goes here -->
-      <a-box position="0 0.5 -2" color="tomato" shadow></a-box>
-      <a-marker type="pattern" url="path/to/your-marker-pattern.patt">
-        <!-- Place your 3D content relative to the marker -->
-        <a-entity position="0 0 0">
-          <a-sphere radius="0.1" color="green"></a-sphere>
-        </a-entity>
-      </a-marker>
-      <a-entity camera></a-entity>
+      <!-- Enable hit testing for the AR scene -->
+      <a-entity id="ar-hit-test" ar-hit-test="doHitTest: true;"></a-entity>
+
+      <!-- Add a 3D object to place on the detected surface -->
+      <a-box id="placed-object" position="0 0 0" scale="0.2 0.2 0.2" color="tomato" shadow></a-box>
+
+      <a-entity camera ar-camera></a-entity>
     </a-scene>
+
+    <script>
+      // When a hit test result is available, move the placed object to that location
+      const arHitTest = document.querySelector("#ar-hit-test");
+      const placedObject = document.querySelector("#placed-object");
+
+      arHitTest.addEventListener("hit-test-result", (event) => {
+        if (event.detail.results.length > 0) {
+          const result = event.detail.results[0];
+          const position = result.getPose(event.detail.inputSource).transform.position;
+          placedObject.setAttribute("position", position.x + " " + position.y + " " + position.z);
+        }
+      });
+    </script>
   </body>
 </html>

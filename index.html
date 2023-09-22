@@ -26,7 +26,8 @@
         raycaster="objects: .ar-hit-test"
       ></a-marker>
 
-      <a-camera-static></a-camera-static>
+      <!-- Use <a-entity camera> instead of <a-camera-static> -->
+      <a-entity camera position="0 1.6 0"></a-entity>
     </a-scene>
 
     <script>

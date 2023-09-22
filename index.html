@@ -6,46 +6,36 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no"
     />
-    <title>AR Hit Test</title>
+    <title>AR Hit Test with AR.js NFT</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/3.0.0/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-hit-test.js"></script>
   </head>
   <body>
-    <a-scene embedded arjs="debugUIEnabled: false;">
-      <!-- Add a 3D object to place on the detected surface -->
-      <a-box
-        id="placed-object"
-        position="0 0 0"
-        scale="0.2 0.2 0.2"
-        color="tomato"
-        shadow
-      ></a-box>
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      <!-- Configure your NFT marker -->
+      <a-nft
+        type="nft"
+        url="path/to/your-nft-marker"
+        smooth="true"
+        smoothCount="10"
+        smoothTolerance=".01"
+        smoothThreshold="5"
+      >
+        <!-- Add 3D content relative to the NFT marker -->
+        <a-box
+          position="0 0.5 0"
+          scale="0.1 0.1 0.1"
+          color="tomato"
+          shadow
+        ></a-box>
+      </a-nft>
 
-      <a-marker
-        preset="hiro"
-        raycaster="objects: .ar-hit-test"
-      ></a-marker>
+      <!-- Use ar-hit-test for AR hit testing -->
+      <a-entity ar-hit-test></a-entity>
 
       <!-- Use <a-entity camera> instead of <a-camera-static> -->
       <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-      // Listen for click events on the marker
-      const marker = document.querySelector("a-marker");
-      marker.addEventListener("click", () => {
-        // Get the marker's world position
-        const markerPosition = marker.object3D.getWorldPosition(
-          new THREE.Vector3()
-        );
-
-        // Move the placed object to the marker's position
-        const placedObject = document.querySelector("#placed-object");
-        placedObject.setAttribute(
-          "position",
-          `${markerPosition.x} ${markerPosition.y} ${markerPosition.z}`
-        );
-      });
-    </script>
   </body>
 </html>

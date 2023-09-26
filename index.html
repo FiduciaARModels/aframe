@@ -1,41 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no"
-    />
-    <title>AR Hit Test with AR.js NFT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-hit-test.js"></script>
+    <script src="https://unpkg.com/aframe-ar@1.5.0/dist/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mediapipe/0.8.0/mediapipe.js"></script>
   </head>
   <body>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <!-- Configure your NFT marker -->
-      <a-nft
-        type="nft"
-        url="path/to/your-nft-marker"
-        smooth="true"
-        smoothCount="10"
-        smoothTolerance=".01"
-        smoothThreshold="5"
-      >
-        <!-- Add 3D content relative to the NFT marker -->
-        <a-box
-          position="0 0.5 0"
-          scale="0.1 0.1 0.1"
-          color="tomato"
-          shadow
-        ></a-box>
-      </a-nft>
+    <a-scene
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      embedded
+    >
+      <!-- AR content goes here -->
 
-      <!-- Use ar-hit-test for AR hit testing -->
-      <a-entity ar-hit-test></a-entity>
+      <!-- Add an <a-sphere> to represent the tracked hand -->
+      <a-sphere
+        id="handSphere"
+        radius="0.05"
+        color="blue"
+      ></a-sphere>
 
-      <!-- Use <a-entity camera> instead of <a-camera-static> -->
-      <a-entity camera></a-entity>
+      <!-- Add a camera to the AR scene -->
+      <a-entity
+        camera
+        arjs-anchor="hit-testing-enabled: true;"
+        look-controls="enabled: false"
+      ></a-entity>
     </a-scene>
+
+    <script>
+      // Initialize MediaPipe HandTracker
+      const handTracker = new MediaPipeHands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/mediapipe@0.8.0/${file}` });
+      handTracker.setOptions({
+        selfieMode: true, // Use the front-facing camera
+        maxNumHands: 1,   // Track only one hand
+      });
+      handTracker.onResults(onHandTracking);
+
+      // Start tracking
+      handTracker.start();
+
+      function onHandTracking(results) {
+        const handLandmarks = results?.multiHandLandmarks[0];
+        if (!handLandmarks) return;
+
+        // Get the position of the hand's index finger tip (you can use other landmarks as well)
+        const indexFingerTip = handLandmarks[8];
+
+        // Map the 2D screen coordinates to 3D A-Frame coordinates
+        const x = indexFingerTip.x * 2 - 1;
+        const y = -(indexFingerTip.y * 2 - 1);
+
+        // Set the position of the <a-sphere> to follow the hand
+        const handSphere = document.querySelector('#handSphere');
+        handSphere.object3D.position.set(x, y, -1); // -1 is the depth
+
+        // Update the scene
+        handSphere.object3D.updateMatrixWorld();
+      }
+    </script>
   </body>
 </html>
